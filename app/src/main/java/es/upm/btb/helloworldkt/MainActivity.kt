@@ -24,8 +24,8 @@ class MainActivity : AppCompatActivity(), LocationListener {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        Log.d(TAG, "onCreate: The activity is being created.");
-        println("Hello world!")
+        Log.d(TAG, "onCreate: The activity is being created.")
+        println("Hello world to test GitHub!")
 
         val buttonNext: Button = findViewById(R.id.mainButton)
         buttonNext.setOnClickListener {
