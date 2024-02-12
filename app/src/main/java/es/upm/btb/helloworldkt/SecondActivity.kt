@@ -16,13 +16,6 @@ class SecondActivity : AppCompatActivity() {
 
         Log.d(TAG, "onCreate: The activity is being created.");
 
-        val bundle = intent.getBundleExtra("locationBundle")
-        val location: Location? = bundle?.getParcelable("location")
-
-        if (location != null) {
-            Log.i(TAG, "onCreate: Location["+location.altitude+"]["+location.latitude+"]["+location.longitude+"][")
-        };
-
         val buttonNext: Button = findViewById(R.id.secondNextButton)
         buttonNext.setOnClickListener {
             val intent = Intent(this, ThirdActivity::class.java)

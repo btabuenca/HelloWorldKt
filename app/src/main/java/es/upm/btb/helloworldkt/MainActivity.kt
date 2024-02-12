@@ -17,7 +17,7 @@ import android.widget.Button
 class MainActivity : AppCompatActivity(), LocationListener {
     private val TAG = "btaMainActivity"
     private lateinit var locationManager: LocationManager
-    private lateinit var latestLocation: Location
+    var latestLocation: Location? = null
     private val locationPermissionCode = 2
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -27,15 +27,18 @@ class MainActivity : AppCompatActivity(), LocationListener {
         Log.d(TAG, "onCreate: The activity is being created.")
         println("Hello world to test System.out standar aoutput!")
 
-        val buttonNext: Button = findViewById(R.id.mainButton)
-        buttonNext.setOnClickListener {
-            val intent = Intent(this, SecondActivity::class.java)
-            val bundle = Bundle()
-            bundle.putParcelable("location", latestLocation)
-            intent.putExtra("locationBundle", bundle)
-            startActivity(intent)
+        val buttonOsm: Button = findViewById(R.id.osmButton)
+        buttonOsm.setOnClickListener {
+            if (latestLocation != null) {
+                val intent = Intent(this, OpenStreetMapActivity::class.java)
+                val bundle = Bundle()
+                bundle.putParcelable("location", latestLocation)
+                intent.putExtra("locationBundle", bundle)
+                startActivity(intent)
+            }else{
+                Log.e(TAG, "Location not set yet.")
+            }
         }
-
         locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
 
         // Check for location permissions
