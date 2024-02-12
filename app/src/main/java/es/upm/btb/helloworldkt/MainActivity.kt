@@ -25,7 +25,7 @@ class MainActivity : AppCompatActivity(), LocationListener {
         setContentView(R.layout.activity_main)
 
         Log.d(TAG, "onCreate: The activity is being created.")
-        println("Hello world to test GitHub!")
+        println("Hello world to test System.out standar aoutput!")
 
         val buttonNext: Button = findViewById(R.id.mainButton)
         buttonNext.setOnClickListener {
