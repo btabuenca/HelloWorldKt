@@ -12,10 +12,10 @@ import androidx.core.app.ActivityCompat
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.util.Log
-import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import java.io.File
 
 class MainActivity : AppCompatActivity(), LocationListener {
@@ -31,6 +31,36 @@ class MainActivity : AppCompatActivity(), LocationListener {
         Log.d(TAG, "onCreate: The activity is being created.")
         println("Hello world to test System.out standard output!")
 
+        // ButtomNavigationMenu
+        val navView: BottomNavigationView = findViewById(R.id.nav_view)
+        navView.setOnNavigationItemSelectedListener { item ->
+            when (item.itemId) {
+                R.id.navigation_home -> {
+                    val intent = Intent(this, MainActivity::class.java)
+                    startActivity(intent)
+                    true
+                }
+                R.id.navigation_map -> {
+                    if (latestLocation != null) {
+                        val intent = Intent(this, OpenStreetMapActivity::class.java)
+                        val bundle = Bundle()
+                        bundle.putParcelable("location", latestLocation)
+                        intent.putExtra("locationBundle", bundle)
+                        startActivity(intent)
+                    }else{
+                        Log.e(TAG, "Location not set yet.")
+                    }
+                    true
+                }
+                R.id.navigation_list -> {
+                    val intent = Intent(this, SecondActivity::class.java)
+                    startActivity(intent)
+                    true
+                }
+                else -> false
+            }
+        }
+
         // Check if the user identifier is already saved
         val userIdentifier = getUserIdentifier()
         if (userIdentifier == null) {
@@ -41,23 +71,6 @@ class MainActivity : AppCompatActivity(), LocationListener {
             Toast.makeText(this, "User ID: $userIdentifier", Toast.LENGTH_LONG).show()
         }
 
-        val buttonNext: Button = findViewById(R.id.mainButton)
-        buttonNext.setOnClickListener {
-            val intent = Intent(this, SecondActivity::class.java)
-            startActivity(intent)
-        }
-        val buttonOsm: Button = findViewById(R.id.osmButton)
-        buttonOsm.setOnClickListener {
-            if (latestLocation != null) {
-                val intent = Intent(this, OpenStreetMapActivity::class.java)
-                val bundle = Bundle()
-                bundle.putParcelable("location", latestLocation)
-                intent.putExtra("locationBundle", bundle)
-                startActivity(intent)
-            }else{
-                Log.e(TAG, "Location not set yet.")
-            }
-        }
         locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
 
         // Check for location permissions

@@ -1,10 +1,13 @@
 package es.upm.btb.helloworldkt
 
+import android.content.Intent
 import android.location.Location
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import org.osmdroid.config.Configuration
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
@@ -48,23 +51,21 @@ class OpenStreetMapActivity : AppCompatActivity() {
         val bundle = intent.getBundleExtra("locationBundle")
         val location: Location? = bundle?.getParcelable("location")
 
+        Configuration.getInstance().load(applicationContext, getSharedPreferences("osm", MODE_PRIVATE))
+
+        map = findViewById(R.id.map)
+        map.setTileSource(TileSourceFactory.MAPNIK)
+        map.controller.setZoom(18.0)
+
         if (location != null) {
-            Log.i(TAG, "onCreate: Location["+location.altitude+"]["+location.latitude+"]["+location.longitude+"][")
-
-            Configuration.getInstance().load(applicationContext, getSharedPreferences("osm", MODE_PRIVATE))
-
-            map = findViewById(R.id.map)
-            map.setTileSource(TileSourceFactory.MAPNIK)
-            map.controller.setZoom(18.0)
-
+            Toast.makeText(this, "Start route on Location["+location.altitude+"]["+location.latitude+"]["+location.longitude+"]", Toast.LENGTH_SHORT).show()
             val startPoint = GeoPoint(location.latitude, location.longitude)
             map.controller.setCenter(startPoint)
-
             addMarker(startPoint, "My current location")
-            //addMarkers(map, gymkhanaCoords, gymkhanaNames)
-
-            addMarkersAndRoute(map, gymkhanaCoords, gymkhanaNames)
-        };
+        }else{
+            Toast.makeText(this, "Creating route without starting point...", Toast.LENGTH_SHORT).show()
+        }
+        addMarkersAndRoute(map, gymkhanaCoords, gymkhanaNames)
     }
 
     private fun addMarker(point: GeoPoint, title: String) {
