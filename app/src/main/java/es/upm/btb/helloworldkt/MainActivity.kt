@@ -12,9 +12,12 @@ import androidx.core.app.ActivityCompat
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.util.Log
+import android.view.Menu
+import android.view.MenuItem
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.widget.Toolbar
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import java.io.File
 
@@ -60,6 +63,10 @@ class MainActivity : AppCompatActivity(), LocationListener {
                 else -> false
             }
         }
+
+        // Configure Toolbar
+        val toolbar: Toolbar = findViewById(R.id.toolbar)
+        setSupportActionBar(toolbar)
 
         // Check if the user identifier is already saved
         val userIdentifier = getUserIdentifier()
@@ -156,5 +163,22 @@ class MainActivity : AppCompatActivity(), LocationListener {
         val timestamp = System.currentTimeMillis()
         file.appendText("$timestamp;$latitude;$longitude\n")
     }
+
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.toolbar_menu, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.action_settings -> {
+                startActivity(Intent(this, SettingsActivity::class.java))
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
+
 
 }
