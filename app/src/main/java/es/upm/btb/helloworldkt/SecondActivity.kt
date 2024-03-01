@@ -11,7 +11,13 @@ import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.ListView
 import android.widget.TextView
+import androidx.lifecycle.lifecycleScope
+import androidx.room.Room
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import es.upm.btb.helloworldkt.persistence.room.AppDatabase
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -19,6 +25,7 @@ import java.util.Locale
 
 class SecondActivity : AppCompatActivity() {
     private val TAG = "btaSecondActivity"
+    lateinit var database: AppDatabase
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -55,13 +62,17 @@ class SecondActivity : AppCompatActivity() {
         val headerView = layoutInflater.inflate(R.layout.listview_header, listView, false)
         listView.addHeaderView(headerView, null, false)
 
-        // Create adapter of coordiantes. See class below
-        val adapter = CoordinatesAdapter(this, readFileContents())
+
+        val adapter = CoordinatesAdapter(this, mutableListOf())
         listView.adapter = adapter
+
+        // Load data from room db
+        database = Room.databaseBuilder(applicationContext, AppDatabase::class.java, "coordinates").build()
+        loadCoordinatesFromDatabase(adapter)
 
     }
 
-    private class CoordinatesAdapter(context: Context, private val coordinatesList: List<List<String>>) :
+    private class CoordinatesAdapter(context: Context, private val coordinatesList: MutableList<List<String>>) :
         ArrayAdapter<List<String>>(context, R.layout.listview_item, coordinatesList) {
 
         private val inflater: LayoutInflater = LayoutInflater.from(context)
@@ -102,16 +113,23 @@ class SecondActivity : AppCompatActivity() {
             return String.format("%.6f", value)
         }
 
+        fun updateData(newData: MutableList<List<String>>) {
+            this.coordinatesList.clear()
+            this.coordinatesList.addAll(newData)
+            notifyDataSetChanged()
+        }
+
     }
 
-    private fun readFileContents(): List<List<String>> {
-        val fileName = "gps_coordinates.csv"
-        return try {
-            openFileInput(fileName).bufferedReader().useLines { lines ->
-                lines.map { it.split(";").map(String::trim) }.toList()
+
+    private fun loadCoordinatesFromDatabase(adapter: CoordinatesAdapter) {
+        lifecycleScope.launch(Dispatchers.IO) {
+            val coordinatesList = database.locationDao().getAllLocations()
+            val formattedList = coordinatesList.map { listOf(it.timestamp.toString(), it.latitude.toString(), it.longitude.toString()) }.toMutableList()
+            withContext(Dispatchers.Main) {
+                adapter.updateData(formattedList)
             }
-        } catch (e: IOException) {
-            listOf(listOf("Error reading file: ${e.message}"))
         }
     }
+
 }

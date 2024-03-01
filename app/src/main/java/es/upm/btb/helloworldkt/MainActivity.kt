@@ -23,7 +23,6 @@ import androidx.room.Room
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import es.upm.btb.helloworldkt.persistence.room.AppDatabase
 import es.upm.btb.helloworldkt.persistence.room.LocationEntity
-import java.io.File
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -107,13 +106,8 @@ class MainActivity : AppCompatActivity(), LocationListener {
             locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 5f, this)
         }
 
-
         // Room database init
-        database = Room.databaseBuilder(
-            applicationContext,
-            AppDatabase::class.java, "coordinates"
-        ).allowMainThreadQueries().build()
-        //val locationDao = database.locationDao()
+        database = Room.databaseBuilder(applicationContext, AppDatabase::class.java, "coordinates").build()
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
@@ -133,16 +127,11 @@ class MainActivity : AppCompatActivity(), LocationListener {
         Toast.makeText(this, "Coordinates update! [${location.latitude}][${location.longitude}]", Toast.LENGTH_LONG).show()
         textView.text = "Latitude: [${location.latitude}], Longitude: [${location.longitude}], UserId: [${getUserIdentifier()}]"
 
-        val ts = System.currentTimeMillis()
-
-        // save coordinates to text file
-        saveCoordinatesToFile(location.latitude, location.longitude, ts)
-
         // save coordinates to room databse
         val newLocation = LocationEntity(
             latitude = location.latitude,
             longitude = location.longitude,
-            timestamp = ts
+            timestamp = System.currentTimeMillis()
         )
         lifecycleScope.launch(Dispatchers.IO) {
             database.locationDao().insertLocation(newLocation)
@@ -186,13 +175,6 @@ class MainActivity : AppCompatActivity(), LocationListener {
         return sharedPreferences.getString("userIdentifier", null)
     }
 
-    private fun saveCoordinatesToFile(latitude: Double, longitude: Double, timestamp: Long) {
-        val fileName = "gps_coordinates.csv"
-        val file = File(filesDir, fileName)
-        file.appendText("$timestamp;$latitude;$longitude\n")
-    }
-
-
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.toolbar_menu, menu)
         return true
@@ -207,6 +189,5 @@ class MainActivity : AppCompatActivity(), LocationListener {
             else -> super.onOptionsItemSelected(item)
         }
     }
-
 
 }
