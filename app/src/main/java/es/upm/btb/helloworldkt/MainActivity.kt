@@ -18,14 +18,22 @@ import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.Toolbar
+import androidx.lifecycle.lifecycleScope
+import androidx.room.Room
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import es.upm.btb.helloworldkt.persistence.room.AppDatabase
+import es.upm.btb.helloworldkt.persistence.room.LocationEntity
 import java.io.File
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+
 
 class MainActivity : AppCompatActivity(), LocationListener {
     private val TAG = "btaMainActivity"
     private lateinit var locationManager: LocationManager
     private var latestLocation: Location? = null
     private val locationPermissionCode = 2
+    lateinit var database: AppDatabase
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -68,7 +76,7 @@ class MainActivity : AppCompatActivity(), LocationListener {
         val toolbar: Toolbar = findViewById(R.id.toolbar)
         setSupportActionBar(toolbar)
 
-        // Check if the user identifier is already saved
+        // Shared prefs. Check if the user identifier is already saved
         val userIdentifier = getUserIdentifier()
         if (userIdentifier == null) {
             // If not, ask for it
@@ -78,9 +86,8 @@ class MainActivity : AppCompatActivity(), LocationListener {
             Toast.makeText(this, "User ID: $userIdentifier", Toast.LENGTH_LONG).show()
         }
 
+        // Location manager init and permisssons
         locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
-
-        // Check for location permissions
         if (ActivityCompat.checkSelfPermission(
                 this,
                 Manifest.permission.ACCESS_FINE_LOCATION
@@ -99,6 +106,14 @@ class MainActivity : AppCompatActivity(), LocationListener {
             // whichever happens first
             locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 5f, this)
         }
+
+
+        // Room database init
+        database = Room.databaseBuilder(
+            applicationContext,
+            AppDatabase::class.java, "coordinates"
+        ).allowMainThreadQueries().build()
+        //val locationDao = database.locationDao()
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
@@ -117,7 +132,21 @@ class MainActivity : AppCompatActivity(), LocationListener {
         val textView: TextView = findViewById(R.id.mainTextView)
         Toast.makeText(this, "Coordinates update! [${location.latitude}][${location.longitude}]", Toast.LENGTH_LONG).show()
         textView.text = "Latitude: [${location.latitude}], Longitude: [${location.longitude}], UserId: [${getUserIdentifier()}]"
-        saveCoordinatesToFile(location.latitude, location.longitude)
+
+        val ts = System.currentTimeMillis()
+
+        // save coordinates to text file
+        saveCoordinatesToFile(location.latitude, location.longitude, ts)
+
+        // save coordinates to room databse
+        val newLocation = LocationEntity(
+            latitude = location.latitude,
+            longitude = location.longitude,
+            timestamp = ts
+        )
+        lifecycleScope.launch(Dispatchers.IO) {
+            database.locationDao().insertLocation(newLocation)
+        }
     }
 
     override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) {}
@@ -157,10 +186,9 @@ class MainActivity : AppCompatActivity(), LocationListener {
         return sharedPreferences.getString("userIdentifier", null)
     }
 
-    private fun saveCoordinatesToFile(latitude: Double, longitude: Double) {
+    private fun saveCoordinatesToFile(latitude: Double, longitude: Double, timestamp: Long) {
         val fileName = "gps_coordinates.csv"
         val file = File(filesDir, fileName)
-        val timestamp = System.currentTimeMillis()
         file.appendText("$timestamp;$latitude;$longitude\n")
     }
 

@@ -93,15 +93,13 @@ class SecondActivity : AppCompatActivity() {
             return view
         }
 
-
         private fun formatTimestamp(timestamp: Long): String {
             val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
             return formatter.format(Date(timestamp))
         }
 
-
         private fun formatCoordinate(value: Double): String {
-            return String.format("%.12f", value)
+            return String.format("%.6f", value)
         }
 
     }
