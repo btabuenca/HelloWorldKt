@@ -24,13 +24,16 @@ import java.util.Locale
 
 class SecondActivity : AppCompatActivity() {
     private val TAG = "btaSecondActivity"
-    lateinit var database: AppDatabase
+
+    private lateinit var listView: ListView
+    private lateinit var adapter: CoordinatesAdapter
+    private lateinit var database: AppDatabase
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_second)
 
-        Log.d(TAG, "onCreate: The activity is being created.");
+        Log.d(TAG, "onCreate: The activity is being created.")
 
         // ButtomNavigationMenu
         val navView: BottomNavigationView = findViewById(R.id.nav_view)
@@ -51,18 +54,36 @@ class SecondActivity : AppCompatActivity() {
         }
 
         // Inflate heading and add to ListView
-        val listView: ListView = findViewById(R.id.lvCoordinates)
+        listView = findViewById(R.id.lvCoordinates)
         val headerView = layoutInflater.inflate(R.layout.listview_header, listView, false)
         listView.addHeaderView(headerView, null, false)
 
-        val adapter = CoordinatesAdapter(this, mutableListOf())
+        // Init adapter
+        adapter = CoordinatesAdapter(this, mutableListOf())
         listView.adapter = adapter
 
-        // Load data from room db
+        // Init database
         database = Room.databaseBuilder(applicationContext, AppDatabase::class.java, "coordinates").build()
-        loadCoordinatesFromDatabase(adapter)
 
     }
+
+    override fun onResume() {
+        super.onResume()
+
+        // Reutiliza el adaptador si ya está inicializado, en lugar de crear uno nuevo
+        if (!::adapter.isInitialized) {
+            adapter = CoordinatesAdapter(this, mutableListOf())
+            listView.adapter = adapter
+        }
+
+        lifecycleScope.launch(Dispatchers.IO) {
+            val itemCount = database.locationDao().getCount()
+            Log.d(TAG, "Number of items in database $itemCount.")
+            loadCoordinatesFromDatabase(adapter)
+        }
+
+    }
+
 
     private class CoordinatesAdapter(context: Context, private val coordinatesList: MutableList<List<String>>) :
         ArrayAdapter<List<String>>(context, R.layout.listview_item, coordinatesList) {
@@ -94,7 +115,7 @@ class SecondActivity : AppCompatActivity() {
 
             } catch (e: Exception) {
                 e.printStackTrace()
-                Log.e("CoordinatesAdapter", "getView: Exception parsing coordinates.");
+                Log.e("CoordinatesAdapter", "getView: Exception parsing coordinates.")
             }
             return view
         }
@@ -124,7 +145,7 @@ class SecondActivity : AppCompatActivity() {
             withContext(Dispatchers.Main) {
                 adapter.updateData(formattedList)
             }
-            Log.d("CoordinatesAdapter", "Number of items in database "+database.locationDao().getCount()+".");
+            Log.d("CoordinatesAdapter", "Number of items in database "+database.locationDao().getCount()+".")
         }
     }
 
