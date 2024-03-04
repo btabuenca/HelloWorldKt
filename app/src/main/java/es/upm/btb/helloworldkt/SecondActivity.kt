@@ -35,26 +35,20 @@ class SecondActivity : AppCompatActivity() {
         // ButtomNavigationMenu
         val navView: BottomNavigationView = findViewById(R.id.nav_view)
         navView.setOnNavigationItemSelectedListener { item ->
+            val currentActivity = this::class.java.simpleName
             when (item.itemId) {
-                R.id.navigation_home -> {
-                    val intent = Intent(this, MainActivity::class.java)
-                    startActivity(intent)
-                    true
+                R.id.navigation_home -> if (currentActivity != MainActivity::class.java.simpleName) {
+                    startActivity(Intent(this, MainActivity::class.java))
                 }
-                R.id.navigation_map -> {
-                    val intent = Intent(this, OpenStreetMapActivity::class.java)
-                    startActivity(intent)
-                    true
+                R.id.navigation_map -> if (currentActivity != OpenStreetMapActivity::class.java.simpleName) {
+                    startActivity(Intent(this, OpenStreetMapActivity::class.java))
                 }
-                R.id.navigation_list -> {
-                    val intent = Intent(this, SecondActivity::class.java)
-                    startActivity(intent)
-                    true
+                R.id.navigation_list -> if (currentActivity != SecondActivity::class.java.simpleName) {
+                    startActivity(Intent(this, SecondActivity::class.java))
                 }
-                else -> false
             }
+            true
         }
-
 
         // Inflate heading and add to ListView
         val listView: ListView = findViewById(R.id.lvCoordinates)
@@ -119,6 +113,7 @@ class SecondActivity : AppCompatActivity() {
             this.coordinatesList.addAll(newData)
             notifyDataSetChanged()
         }
+
     }
 
 
@@ -129,6 +124,7 @@ class SecondActivity : AppCompatActivity() {
             withContext(Dispatchers.Main) {
                 adapter.updateData(formattedList)
             }
+            Log.d("CoordinatesAdapter", "Number of items in database "+database.locationDao().getCount()+".");
         }
     }
 

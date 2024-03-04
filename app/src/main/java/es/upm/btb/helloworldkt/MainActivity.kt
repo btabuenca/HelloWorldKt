@@ -44,13 +44,12 @@ class MainActivity : AppCompatActivity(), LocationListener {
         // ButtomNavigationMenu
         val navView: BottomNavigationView = findViewById(R.id.nav_view)
         navView.setOnNavigationItemSelectedListener { item ->
+            val currentActivity = this::class.java.simpleName
             when (item.itemId) {
-                R.id.navigation_home -> {
-                    val intent = Intent(this, MainActivity::class.java)
-                    startActivity(intent)
-                    true
+                R.id.navigation_home -> if (currentActivity != MainActivity::class.java.simpleName) {
+                    startActivity(Intent(this, MainActivity::class.java))
                 }
-                R.id.navigation_map -> {
+                R.id.navigation_map -> if (currentActivity != OpenStreetMapActivity::class.java.simpleName) {
                     if (latestLocation != null) {
                         val intent = Intent(this, OpenStreetMapActivity::class.java)
                         val bundle = Bundle()
@@ -59,16 +58,15 @@ class MainActivity : AppCompatActivity(), LocationListener {
                         startActivity(intent)
                     }else{
                         Log.e(TAG, "Location not set yet.")
+                        startActivity(Intent(this, OpenStreetMapActivity::class.java))
                     }
                     true
                 }
-                R.id.navigation_list -> {
-                    val intent = Intent(this, SecondActivity::class.java)
-                    startActivity(intent)
-                    true
+                R.id.navigation_list -> if (currentActivity != SecondActivity::class.java.simpleName) {
+                    startActivity(Intent(this, SecondActivity::class.java))
                 }
-                else -> false
             }
+            true
         }
 
         // Configure Toolbar
@@ -122,8 +120,8 @@ class MainActivity : AppCompatActivity(), LocationListener {
     override fun onLocationChanged(location: Location) {
         latestLocation = location
         val textView: TextView = findViewById(R.id.mainTextView)
+        textView.text = "\uD83D\uDCCD Latitude: [${location.latitude}], Longitude: [${location.longitude}], UserId: [${getUserIdentifier()}]"
         Toast.makeText(this, "Coordinates update! [${location.latitude}][${location.longitude}]", Toast.LENGTH_LONG).show()
-        textView.text = "Latitude: [${location.latitude}], Longitude: [${location.longitude}], UserId: [${getUserIdentifier()}]"
 
         // save coordinates to room databse
         val newLocation = LocationEntity(

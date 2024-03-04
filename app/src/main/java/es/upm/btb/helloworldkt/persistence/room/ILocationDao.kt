@@ -11,4 +11,11 @@ interface ILocationDao {
 
     @Query("SELECT * FROM LocationEntity")
     fun getAllLocations(): List<LocationEntity>
+
+    @Query("SELECT COUNT(*) FROM LocationEntity")
+    fun getCount(): Int
+
+    @Query("DELETE FROM LocationEntity WHERE timestamp = :timestamp")
+    fun deleteLocationByTimestamp(timestamp: Long)
+
 }
