@@ -1,11 +1,15 @@
     package es.upm.btb.helloworldkt
 
+    import android.Manifest
     import android.content.Context
+    import android.content.pm.PackageManager
     import android.location.Location
+    import android.location.LocationManager
     import android.os.Bundle
     import android.util.Log
     import android.widget.Toast
     import androidx.appcompat.app.AppCompatActivity
+    import androidx.core.app.ActivityCompat
     import androidx.core.content.ContextCompat
     import androidx.lifecycle.lifecycleScope
     import androidx.room.Room
@@ -36,6 +40,7 @@
             val bundle = intent.getBundleExtra("locationBundle")
             val location: Location? = bundle?.getParcelable("location")
 
+            // Display open street map
             Configuration.getInstance().load(applicationContext, getSharedPreferences("osm", MODE_PRIVATE))
 
             map = findViewById(R.id.map)

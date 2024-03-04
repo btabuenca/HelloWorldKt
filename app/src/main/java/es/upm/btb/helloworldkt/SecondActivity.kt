@@ -18,7 +18,6 @@ import es.upm.btb.helloworldkt.persistence.room.AppDatabase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -62,7 +61,6 @@ class SecondActivity : AppCompatActivity() {
         val headerView = layoutInflater.inflate(R.layout.listview_header, listView, false)
         listView.addHeaderView(headerView, null, false)
 
-
         val adapter = CoordinatesAdapter(this, mutableListOf())
         listView.adapter = adapter
 
@@ -90,13 +88,16 @@ class SecondActivity : AppCompatActivity() {
                 latitudeTextView.text = formatCoordinate(item[1].toDouble())
                 longitudeTextView.text = formatCoordinate(item[2].toDouble())
 
+                // move to next activity
                 view.setOnClickListener {
                     val intent = Intent(context, ThirdActivity::class.java).apply {
-                        putExtra("latitude", item[1])
-                        putExtra("longitude", item[2])
+                        putExtra("timestamp", item[0].toLong())
+                        putExtra("latitude", item[1].toDouble())
+                        putExtra("longitude", item[2].toDouble())
                     }
                     context.startActivity(intent)
                 }
+
             } catch (e: Exception) {
                 e.printStackTrace()
                 Log.e("CoordinatesAdapter", "getView: Exception parsing coordinates.");
@@ -118,7 +119,6 @@ class SecondActivity : AppCompatActivity() {
             this.coordinatesList.addAll(newData)
             notifyDataSetChanged()
         }
-
     }
 
 

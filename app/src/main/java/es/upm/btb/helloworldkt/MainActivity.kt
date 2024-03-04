@@ -78,10 +78,8 @@ class MainActivity : AppCompatActivity(), LocationListener {
         // Shared prefs. Check if the user identifier is already saved
         val userIdentifier = getUserIdentifier()
         if (userIdentifier == null) {
-            // If not, ask for it
             askForUserIdentifier()
         } else {
-            // If yes, use it or show it
             Toast.makeText(this, "User ID: $userIdentifier", Toast.LENGTH_LONG).show()
         }
 
