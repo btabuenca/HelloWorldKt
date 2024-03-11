@@ -7,4 +7,9 @@
         android:orderInCategory="100"
         android:icon="@mipmap/config_monochrome"
         app:showAsAction="never"/>
+    <item
+        android:id="@+id/action_logout"
+        android:title="Logout"
+        android:orderInCategory="101"
+        app:showAsAction="never"/>
 </menu>

@@ -1,8 +1,11 @@
 <resources>
-    <string name="app_name">MAD</string>
+    <string name="app_name">MAD Tracking</string>
     <string name="title_home">Home</string>
     <string name="title_map">Map</string>
     <string name="title_list">Collection</string>
     <string name="title_config">Settings</string>
     <string name="title_activity_settings">SettingsActivity</string>
+    <string name="signed_in">Signed in!</string>
+    <string name="signed_out">Signed out!</string>
+    <string name="signed_cancelled">Signed in cancelled</string>
 </resources>
