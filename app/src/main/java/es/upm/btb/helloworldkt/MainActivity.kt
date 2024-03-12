@@ -83,9 +83,9 @@ class MainActivity : AppCompatActivity(), LocationListener {
         setSupportActionBar(toolbar)
 
         // Shared prefs. Check if the user identifier is already saved
-        val userIdentifier = getUserIdentifier()
+        val userIdentifier = getUserTokenSharedPrefs()
         if (userIdentifier == null) {
-            askForUserIdentifier()
+            askForUserToken()
         } else {
             Toast.makeText(this, "User ID: $userIdentifier", Toast.LENGTH_LONG).show()
         }
@@ -133,7 +133,7 @@ class MainActivity : AppCompatActivity(), LocationListener {
     override fun onLocationChanged(location: Location) {
         latestLocation = location
         val textView: TextView = findViewById(R.id.mainTextView)
-        textView.text = "\uD83D\uDCCD Latitude: [${location.latitude}], Longitude: [${location.longitude}], UserId: [${getUserIdentifier()}]"
+        textView.text = "\uD83D\uDCCD Latitude: [${location.latitude}], Longitude: [${location.longitude}], UserToken: [${getUserTokenSharedPrefs()}]"
         Toast.makeText(this, "Coordinates update! [${location.latitude}][${location.longitude}]", Toast.LENGTH_LONG).show()
 
         // save coordinates to room databse
@@ -152,26 +152,26 @@ class MainActivity : AppCompatActivity(), LocationListener {
     override fun onProviderDisabled(provider: String) {}
 
 
-    private fun askForUserIdentifier() {
+    private fun askForUserToken() {
         val input = EditText(this)
         AlertDialog.Builder(this)
-            .setTitle("Enter User Identifier")
+            .setTitle("Enter User Token")
             .setIcon(R.mipmap.ic_launcher)
             .setView(input)
             .setPositiveButton("Save") { dialog, which ->
                 val userInput = input.text.toString()
                 if (userInput.isNotBlank()) {
-                    saveUserIdentifier(userInput)
-                    Toast.makeText(this, "User ID saved: $userInput", Toast.LENGTH_LONG).show()
+                    setUserTokenSharedPrefs(userInput)
+                    Toast.makeText(this, "User token saved: $userInput", Toast.LENGTH_LONG).show()
                 } else {
-                    Toast.makeText(this, "User ID cannot be blank", Toast.LENGTH_LONG).show()
+                    Toast.makeText(this, "User token cannot be blank", Toast.LENGTH_LONG).show()
                 }
             }
             .setNegativeButton("Cancel", null)
             .show()
     }
 
-    private fun saveUserIdentifier(userIdentifier: String) {
+    private fun setUserTokenSharedPrefs(userIdentifier: String) {
         val sharedPreferences = this.getSharedPreferences("AppPreferences", MODE_PRIVATE)
         sharedPreferences.edit().apply {
             putString("userIdentifier", userIdentifier)
@@ -179,7 +179,7 @@ class MainActivity : AppCompatActivity(), LocationListener {
         }
     }
 
-    private fun getUserIdentifier(): String? {
+    private fun getUserTokenSharedPrefs(): String? {
         val sharedPreferences = this.getSharedPreferences("AppPreferences", MODE_PRIVATE)
         return sharedPreferences.getString("userIdentifier", null)
     }
@@ -211,7 +211,12 @@ class MainActivity : AppCompatActivity(), LocationListener {
                 // user login succeeded
                 val user = FirebaseAuth.getInstance().currentUser
                 Toast.makeText(this, R.string.signed_in, Toast.LENGTH_SHORT).show();
-                Log.i(TAG, "onActivityResult " + getString(R.string.signed_in));
+                user?.let {
+                    val name = user.displayName ?: "No Name"
+                    val uid = user.uid ?: "ND"
+                    Log.i(TAG, "onActivityResult " + getString(R.string.signed_in) +"["+uid+"]"+ name);
+                }
+
 
             } else {
                 // user login failed
@@ -250,7 +255,7 @@ class MainActivity : AppCompatActivity(), LocationListener {
             }
     }
 
-    private fun updateUIWithUsername() {
+    private fun updateUIWithUserData() {
         val user = FirebaseAuth.getInstance().currentUser
         val userNameTextView: TextView = findViewById(R.id.userNameTextView)
         user?.let {
@@ -260,6 +265,6 @@ class MainActivity : AppCompatActivity(), LocationListener {
     }
     override fun onResume() {
         super.onResume()
-        updateUIWithUsername()
+        updateUIWithUserData()
     }
 }

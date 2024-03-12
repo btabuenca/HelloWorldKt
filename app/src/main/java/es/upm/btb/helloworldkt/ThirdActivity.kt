@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.widget.Button
+import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
@@ -12,6 +13,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.room.Room
+import com.google.firebase.auth.FirebaseAuth
 import es.upm.btb.helloworldkt.persistence.retrofit.IOpenWeather
 import es.upm.btb.helloworldkt.persistence.retrofit.WeatherAdapter
 import es.upm.btb.helloworldkt.persistence.retrofit.data.WeatherData
@@ -24,6 +26,7 @@ import retrofit2.Callback
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import com.google.firebase.database.FirebaseDatabase
 
 class ThirdActivity : AppCompatActivity() {
     private val TAG = "btaThirdActivity"
@@ -31,7 +34,7 @@ class ThirdActivity : AppCompatActivity() {
     private lateinit var weatherService: IOpenWeather
     private lateinit var weatherAdapter: WeatherAdapter
 
-    lateinit var database: AppDatabase
+    private lateinit var database: AppDatabase
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -61,7 +64,7 @@ class ThirdActivity : AppCompatActivity() {
         recyclerView.adapter = weatherAdapter
         requestWeatherData(latitude, longitude, userIdentifier?: "default_value")
 
-        // Delete item
+        // Delete item from room
         val deleteButton: Button = findViewById(R.id.deleteButton)
         deleteButton.setOnClickListener {
             AlertDialog.Builder(this)
@@ -74,12 +77,34 @@ class ThirdActivity : AppCompatActivity() {
                         database.locationDao().deleteLocationByTimestamp(timestamp)
                         Log.d(TAG, "Number of items in database after delete "+database.locationDao().getCount()+".");
                         withContext(Dispatchers.Main) {
-                            finish() // Cierra la actividad en el hilo principal
+                            finish()
                         }
                     }
                 }
                 .setNegativeButton("No", null)
                 .show()
+        }
+
+        // Add item to Firebase realtime database
+        val addReportButton: Button = findViewById(R.id.addReportButton)
+        val editTextReport: EditText = findViewById(R.id.editTextReport)
+        val user = FirebaseAuth.getInstance().currentUser
+        val userId = user?.uid
+
+        addReportButton.setOnClickListener {
+            val reportText = editTextReport.text.toString().trim()
+            if (reportText.isNotEmpty() && userId != null) {
+                val report = mapOf(
+                    "userId" to userId,
+                    "timestamp" to timestamp,
+                    "report" to reportText,
+                    "latitude" to latitude,
+                    "longitude" to longitude
+                )
+                addReportToDatabase(report)
+            } else {
+                Toast.makeText(this, "Report name cannot be empty", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
@@ -130,4 +155,17 @@ class ThirdActivity : AppCompatActivity() {
         val sharedPreferences = this.getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
         return sharedPreferences.getString("userIdentifier", null)
     }
+
+    private fun addReportToDatabase(report: Map<String, Any>) {
+        val databaseReference = FirebaseDatabase.getInstance().reference.child("hotspots").push()
+        databaseReference.setValue(report)
+            .addOnSuccessListener {
+                Toast.makeText(this, "Report added successfully", Toast.LENGTH_SHORT).show()
+            }
+            .addOnFailureListener { e ->
+                Toast.makeText(this, "Failed to add report: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
+    }
+
+
 }
