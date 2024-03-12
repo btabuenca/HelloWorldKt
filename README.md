@@ -17,38 +17,51 @@ Include screenshots of the app in action. You can upload the images to GitHub an
 ![Image Description](URL_of_the_image)
 
 
+
+
+![Descripción de la imagen 1](img/nav1.png)
+![Descripción de la imagen 2](img/nav2.png)
+
+![Descripción de la imagen 3](img/nav3.png)
+![Descripción de la imagen 4](img/nav4.png)
+
+![Descripción de la imagen 5](img/nav5.png)
+![Descripción de la imagen 6](img/nav6.png)
+
+
 <table>
   <tr>
     <td>
-      <img src="URL_de_la_imagen1" width="100%" alt="Descripción de la imagen 1"/>
+      <img src="img/nav1.png" width="100%" alt="Descripción de la imagen 1"/>
       <p align="center">Descripción de la imagen 1</p>
     </td>
     <td>
-      <img src="URL_de_la_imagen2" width="100%" alt="Descripción de la imagen 2"/>
+      <img src="img/nav2.png" width="100%" alt="Descripción de la imagen 2"/>
       <p align="center">Descripción de la imagen 2</p>
     </td>
   </tr>
   <tr>
     <td>
-      <img src="URL_de_la_imagen3" width="100%" alt="Descripción de la imagen 3"/>
+      <img src="img/nav3.png" width="100%" alt="Descripción de la imagen 3"/>
       <p align="center">Descripción de la imagen 3</p>
     </td>
     <td>
-      <img src="URL_de_la_imagen4" width="100%" alt="Descripción de la imagen 4"/>
+      <img src="img/nav4.png" width="100%" alt="Descripción de la imagen 4"/>
       <p align="center">Descripción de la imagen 4</p>
     </td>
   </tr>
   <tr>
     <td>
-      <img src="URL_de_la_imagen5" width="100%" alt="Descripción de la imagen 5"/>
+      <img src="img/nav5.png" width="100%" alt="Descripción de la imagen 5"/>
       <p align="center">Descripción de la imagen 5</p>
     </td>
     <td>
-      <img src="URL_de_la_imagen6" width="100%" alt="Descripción de la imagen 6"/>
+      <img src="img/nav6.png" width="100%" alt="Descripción de la imagen 6"/>
       <p align="center">Descripción de la imagen 6</p>
     </td>
   </tr>
 </table>
+
 
 
 ## Demo Video
