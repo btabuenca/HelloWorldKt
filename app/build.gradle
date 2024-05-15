@@ -6,11 +6,11 @@ plugins {
 }
 
 android {
-    namespace 'es.upm.btb.helloworldkt'
+    namespace 'es.upm.btb.suteekt'
     compileSdk 34
 
     defaultConfig {
-        applicationId "es.upm.btb.helloworldkt"
+        applicationId "es.upm.btb.suteekt"
         minSdk 26
         targetSdk 34
         versionCode 1
@@ -40,7 +40,7 @@ android {
 dependencies {
     // Firebase. When using the BoM, don't specify versions in Firebase dependencies
     // https://firebase.google.com/docs/android/setup#available-libraries
-    implementation platform('com.google.firebase:firebase-bom:32.7.4')
+    implementation platform('com.google.firebase:firebase-bom:33.0.0')
     implementation("com.google.firebase:firebase-auth")
     implementation 'com.firebaseui:firebase-ui-auth:8.0.1'
     implementation 'com.google.firebase:firebase-database-ktx'

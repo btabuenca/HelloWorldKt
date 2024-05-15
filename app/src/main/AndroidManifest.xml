@@ -16,7 +16,7 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher"
         android:supportsRtl="true"
-        android:theme="@style/Theme.HelloWorldKt"
+        android:theme="@style/Theme.SuteeKt"
         android:networkSecurityConfig="@xml/network_security_config"
         tools:targetApi="31">
         <activity
