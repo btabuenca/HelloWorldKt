@@ -26,14 +26,14 @@
             android:name=".OpenStreetMapActivity"
             android:exported="false" />
         <activity
-            android:name=".ThirdActivity"
+            android:name=".WeatherActivity"
             android:exported="false">
             <meta-data
                 android:name="android.app.lib_name"
                 android:value="" />
         </activity>
         <activity
-            android:name=".SecondActivity"
+            android:name=".ListCoordinatesActivity"
             android:exported="false">
             <meta-data
                 android:name="android.app.lib_name"

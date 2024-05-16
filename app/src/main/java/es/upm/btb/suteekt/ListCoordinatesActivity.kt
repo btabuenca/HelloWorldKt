@@ -22,7 +22,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-class SecondActivity : AppCompatActivity() {
+class ListCoordinatesActivity : AppCompatActivity() {
     private val TAG = "btaSecondActivity"
 
     private lateinit var listView: ListView
@@ -31,7 +31,7 @@ class SecondActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_second)
+        setContentView(R.layout.activity_list_coordinates)
 
         Log.d(TAG, "onCreate: The activity is being created.")
 
@@ -46,8 +46,8 @@ class SecondActivity : AppCompatActivity() {
                 R.id.navigation_map -> if (currentActivity != OpenStreetMapActivity::class.java.simpleName) {
                     startActivity(Intent(this, OpenStreetMapActivity::class.java))
                 }
-                R.id.navigation_list -> if (currentActivity != SecondActivity::class.java.simpleName) {
-                    startActivity(Intent(this, SecondActivity::class.java))
+                R.id.navigation_list -> if (currentActivity != ListCoordinatesActivity::class.java.simpleName) {
+                    startActivity(Intent(this, ListCoordinatesActivity::class.java))
                 }
             }
             true
@@ -105,7 +105,7 @@ class SecondActivity : AppCompatActivity() {
 
                 // move to next activity
                 view.setOnClickListener {
-                    val intent = Intent(context, ThirdActivity::class.java).apply {
+                    val intent = Intent(context, WeatherActivity::class.java).apply {
                         putExtra("timestamp", item[0].toLong())
                         putExtra("latitude", item[1].toDouble())
                         putExtra("longitude", item[2].toDouble())

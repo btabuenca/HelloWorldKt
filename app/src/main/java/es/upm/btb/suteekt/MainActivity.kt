@@ -10,6 +10,8 @@ import android.os.Bundle
 import android.widget.TextView
 import androidx.core.app.ActivityCompat
 import android.content.Intent
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import android.util.Log
 import android.view.Menu
@@ -29,24 +31,45 @@ import com.firebase.ui.auth.AuthUI
 import com.firebase.ui.auth.IdpResponse
 import com.google.firebase.auth.FirebaseAuth
 
-
 class MainActivity : AppCompatActivity(), LocationListener {
     private val TAG = "btaMainActivity"
     private lateinit var locationManager: LocationManager
     private var latestLocation: Location? = null
     private val locationPermissionCode = 2
     private lateinit var database: AppDatabase
-
-    // companion is the same than an static object in java
-    companion object {
-        private const val RC_SIGN_IN = 123
-    }
+    private lateinit var signInLauncher: ActivityResultLauncher<Intent>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
         Log.d(TAG, "onCreate: The activity is being created.")
+
+        // Initialize the sign-in launcher
+        signInLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            val response = IdpResponse.fromResultIntent(result.data)
+            if (result.resultCode == Activity.RESULT_OK) {
+                // user login succeeded
+                val user = FirebaseAuth.getInstance().currentUser
+                Toast.makeText(this, R.string.signed_in, Toast.LENGTH_SHORT).show()
+                updateUIWithUserData()
+            } else {
+                // user login failed
+                Log.e(TAG, "Error starting auth session: ${response?.error?.errorCode}")
+                Toast.makeText(this, R.string.signed_cancelled, Toast.LENGTH_SHORT).show()
+                //finish()
+            }
+        }
+        // Check if the user is already signed in
+        val currentUser = FirebaseAuth.getInstance().currentUser
+        if (currentUser == null) {
+            // No user is signed in, launch the sign-in flow
+            launchSignInFlow()
+        } else {
+            // User is already signed in
+            Toast.makeText(this, "Welcome back, ${currentUser.displayName}", Toast.LENGTH_SHORT).show()
+            updateUIWithUserData()
+        }
 
         // ButtomNavigationMenu
         val navView: BottomNavigationView = findViewById(R.id.nav_view)
@@ -63,14 +86,14 @@ class MainActivity : AppCompatActivity(), LocationListener {
                         bundle.putParcelable("location", latestLocation)
                         intent.putExtra("locationBundle", bundle)
                         startActivity(intent)
-                    }else{
+                    } else {
                         Log.e(TAG, "Location not set yet.")
                         startActivity(Intent(this, OpenStreetMapActivity::class.java))
                     }
                     true
                 }
-                R.id.navigation_list -> if (currentActivity != SecondActivity::class.java.simpleName) {
-                    startActivity(Intent(this, SecondActivity::class.java))
+                R.id.navigation_list -> if (currentActivity != ListCoordinatesActivity::class.java.simpleName) {
+                    startActivity(Intent(this, ListCoordinatesActivity::class.java))
                 }
             }
             true
@@ -88,7 +111,7 @@ class MainActivity : AppCompatActivity(), LocationListener {
             Toast.makeText(this, "User ID: $userIdentifier", Toast.LENGTH_LONG).show()
         }
 
-        // Location manager init and permisssons
+        // Location manager init and permissions
         locationManager = getSystemService(LOCATION_SERVICE) as LocationManager
         if (ActivityCompat.checkSelfPermission(
                 this,
@@ -112,9 +135,6 @@ class MainActivity : AppCompatActivity(), LocationListener {
         // Room database init
         database = Room.databaseBuilder(applicationContext, AppDatabase::class.java, "coordinates").build()
 
-
-        // Init authentication flow
-        launchSignInFlow()
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
@@ -145,10 +165,9 @@ class MainActivity : AppCompatActivity(), LocationListener {
         }
     }
 
-    override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) {}    
+    override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) {}
     override fun onProviderEnabled(provider: String) {}
     override fun onProviderDisabled(provider: String) {}
-
 
     private fun askForUserToken() {
         val input = EditText(this)
@@ -201,41 +220,18 @@ class MainActivity : AppCompatActivity(), LocationListener {
         }
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == RC_SIGN_IN) {
-            val response = IdpResponse.fromResultIntent(data)
-            if (resultCode == Activity.RESULT_OK) {
-                // user login succeeded
-                val user = FirebaseAuth.getInstance().currentUser
-                Toast.makeText(this, R.string.signed_in, Toast.LENGTH_SHORT).show();
-                user?.let {
-                    val name = user.displayName ?: "No Name"
-                    val uid = user.uid ?: "ND"
-                    Log.i(TAG, "onActivityResult " + getString(R.string.signed_in) +"["+uid+"]"+ name);
-                }
-            } else {
-                // user login failed
-                Log.e(TAG, "Error starting auth session: ${response?.error?.errorCode}")
-                Toast.makeText(this, R.string.signed_cancelled, Toast.LENGTH_SHORT).show();
-                finish()
-            }
-        }
-    }
-
     private fun launchSignInFlow() {
         val providers = arrayListOf(
             AuthUI.IdpConfig.EmailBuilder().build(),
             AuthUI.IdpConfig.GoogleBuilder().build()
         )
 
-        startActivityForResult(
-            AuthUI.getInstance()
-                .createSignInIntentBuilder()
-                .setAvailableProviders(providers)
-                .build(),
-            RC_SIGN_IN
-        )
+        val signInIntent = AuthUI.getInstance()
+            .createSignInIntentBuilder()
+            .setAvailableProviders(providers)
+            .build()
+
+        signInLauncher.launch(signInIntent)
     }
 
     private fun logout() {
@@ -258,7 +254,9 @@ class MainActivity : AppCompatActivity(), LocationListener {
             val name = user.displayName ?: "No Name"
             userNameTextView.text = "\uD83E\uDD35\u200D♂\uFE0F " + name
         }
+        Log.d(TAG, "User: $user, Email: $userNameTextView")
     }
+
     override fun onResume() {
         super.onResume()
         updateUIWithUserData()

@@ -28,7 +28,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import com.google.firebase.database.FirebaseDatabase
 
-class ThirdActivity : AppCompatActivity() {
+class WeatherActivity : AppCompatActivity() {
     private val TAG = "btaThirdActivity"
 
     private lateinit var weatherService: IOpenWeather
@@ -38,7 +38,7 @@ class ThirdActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_third)
+        setContentView(R.layout.activity_weather)
 
         // Get coordinates for selected item. Set default ones if  not obtained.
         val timestamp = intent.getLongExtra("timestamp", 0)
@@ -58,6 +58,7 @@ class ThirdActivity : AppCompatActivity() {
 
         // Initialize Retrofit to retrieve data from external web service
         initRetrofit()
+
         val recyclerView: RecyclerView = findViewById(R.id.recyclerViewWeather)
         recyclerView.layoutManager = LinearLayoutManager(this)
         weatherAdapter = WeatherAdapter(emptyList())
@@ -85,7 +86,7 @@ class ThirdActivity : AppCompatActivity() {
                 .show()
         }
 
-        // Add item to Firebase realtime database
+
         val addReportButton: Button = findViewById(R.id.addReportButton)
         val editTextReport: EditText = findViewById(R.id.editTextReport)
         val user = FirebaseAuth.getInstance().currentUser
@@ -101,6 +102,7 @@ class ThirdActivity : AppCompatActivity() {
                     "latitude" to latitude,
                     "longitude" to longitude
                 )
+                // Add item to Firebase realtime database
                 addReportToDatabase(report)
             } else {
                 Toast.makeText(this, "Report name cannot be empty", Toast.LENGTH_SHORT).show()
@@ -121,7 +123,7 @@ class ThirdActivity : AppCompatActivity() {
         val weatherDataCall = weatherService.getWeatherData(
             latitude = latitude,
             longitude = longitude,
-            count = 10,
+            count = 5,
             apiKey = apiKey
         )
 
@@ -132,21 +134,21 @@ class ThirdActivity : AppCompatActivity() {
                         // Now it's safe to use weatherResponse.list
                         weatherAdapter.updateWeatherData(weatherResponse.list)
                         weatherAdapter.notifyDataSetChanged()
-                        Toast.makeText(this@ThirdActivity, "Weather Data Retrieved", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this@WeatherActivity, "Weather Data Retrieved", Toast.LENGTH_SHORT).show()
                     } ?: run {
-                        Toast.makeText(this@ThirdActivity, "Response is null", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this@WeatherActivity, "Response is null", Toast.LENGTH_SHORT).show()
                     }
 
                 } else {
                     Log.e("MainActivity", "Error fetching weather data: ${response.errorBody()?.string()}")
-                    Toast.makeText(this@ThirdActivity, "Failed to retrieve data", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@WeatherActivity, "Failed to retrieve data", Toast.LENGTH_SHORT).show()
                 }
             }
 
             override fun onFailure(call: Call<WeatherData>, t: Throwable) {
                 // Handle error case
                 Log.e("MainActivity", "Failure: ${t.message}")
-                Toast.makeText(this@ThirdActivity, t.message, Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@WeatherActivity, t.message, Toast.LENGTH_SHORT).show()
             }
         })
     }
@@ -156,6 +158,9 @@ class ThirdActivity : AppCompatActivity() {
         return sharedPreferences.getString("userIdentifier", null)
     }
 
+    /**
+     * Add item to firebase realtime database in collection hotspots
+     */
     private fun addReportToDatabase(report: Map<String, Any>) {
         val databaseReference = FirebaseDatabase.getInstance().reference.child("hotspots").push()
         databaseReference.setValue(report)

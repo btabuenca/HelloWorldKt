@@ -29,7 +29,7 @@ class SettingsActivity : AppCompatActivity() {
                     true
                 }
                 R.id.navigation_list -> {
-                    val intent = Intent(this, SecondActivity::class.java)
+                    val intent = Intent(this, ListCoordinatesActivity::class.java)
                     startActivity(intent)
                     true
                 }
