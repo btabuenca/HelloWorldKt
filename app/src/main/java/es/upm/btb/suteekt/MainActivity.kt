@@ -143,22 +143,18 @@ class MainActivity : AppCompatActivity(), LocationListener {
 
 
         // Firebase uploader init
-        uploader = FirebaseUploader()
+        uploader = FirebaseUploader(this)
         filePickerLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
             uri?.let {
-                uploader.uploadFile(uri, onSuccess = {
-                    Toast.makeText(this, "Archivo subido con éxito!", Toast.LENGTH_SHORT).show()
-                }, onFailure = { exception ->
-                    Toast.makeText(this, "Error al subir archivo: ${exception.message}", Toast.LENGTH_SHORT).show()
-                })
+                uploader.uploadFile(uri, onSuccess = {}, onFailure = {})
             }
         }
-
         val imageView = findViewById<ImageView>(R.id.appIconImageView)
         imageView.setOnClickListener {
-            // Configura el launcher para aceptar imágenes, videos y PDFs
-            filePickerLauncher.launch("*/*")
+            filePickerLauncher.launch("*/*")  // Podría ser sólo imagenes, sólo videos
         }
+
+
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
