@@ -21,58 +21,58 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Coordinates"
-        android:textSize="24sp"
+        android:textSize="12sp"
         app:layout_constraintTop_toBottomOf="@id/imageView"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"/>
 
     <Button
-        android:id="@+id/testButton"
+        android:id="@+id/deleteButton"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="Test Item"
+        android:text="Delete item from room DB"
         app:layout_constraintTop_toBottomOf="@id/coordinatesTextView"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent" />
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerViewWeather"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        app:layout_constraintTop_toBottomOf="@id/testButton"
-        app:layout_constraintBottom_toTopOf="@id/deleteButton"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
-
     <Button
-        android:id="@+id/deleteButton"
+        android:id="@+id/seeRtdbReportsButton"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="Delete Item"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/nav_view"
-        app:layout_constraintTop_toBottomOf="@id/recyclerViewWeather"
-        app:layout_constraintEnd_toStartOf="@+id/editTextReport" />
+        android:text="See RTDB reports"
+        app:layout_constraintTop_toBottomOf="@id/deleteButton"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent" />
+
 
     <EditText
         android:id="@+id/editTextReport"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:hint="Report name"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/nav_view"
-        app:layout_constraintTop_toBottomOf="@id/recyclerViewWeather"
-        app:layout_constraintEnd_toStartOf="@id/addReportButton"/>
+        android:hint="Write your report here"
+        app:layout_constraintTop_toBottomOf="@id/seeRtdbReportsButton"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"/>
 
     <Button
         android:id="@+id/addReportButton"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="Add Report"
-        app:layout_constraintTop_toTopOf="@id/editTextReport"
-        app:layout_constraintBottom_toBottomOf="@id/editTextReport"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/editTextReport"/>
+        android:text="Add Report to RTDB"
+        app:layout_constraintTop_toBottomOf="@id/editTextReport"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent" />
+
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerViewWeather"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintTop_toBottomOf="@id/addReportButton"
+        app:layout_constraintBottom_toTopOf="@id/nav_view"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/nav_view"

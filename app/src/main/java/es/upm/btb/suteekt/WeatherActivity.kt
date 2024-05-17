@@ -1,6 +1,7 @@
 package es.upm.btb.suteekt
 
 import android.content.Context
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
@@ -29,7 +30,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 import com.google.firebase.database.FirebaseDatabase
 
 class WeatherActivity : AppCompatActivity() {
-    private val TAG = "btaThirdActivity"
+    private val TAG = "WeatherActivity"
 
     private lateinit var weatherService: IOpenWeather
     private lateinit var weatherAdapter: WeatherAdapter
@@ -51,6 +52,16 @@ class WeatherActivity : AppCompatActivity() {
             Toast.makeText(this, "User ID not set set. Request will not work", Toast.LENGTH_LONG).show()
         }
         Log.d(TAG, "Latitude: $latitude, Longitude: $longitude, Timestamp: $timestamp")
+
+        // Setup the button to open HotspotsActivity
+        val seeRtdbReportsButton: Button = findViewById(R.id.seeRtdbReportsButton)
+        seeRtdbReportsButton.setOnClickListener {
+            val intent = Intent(this, HotspotsActivity::class.java).apply {
+                putExtra("latitude", latitude)
+                putExtra("longitude", longitude)
+            }
+            startActivity(intent)
+        }
 
         // Find the TextView and set the coordinates
         val coordinatesTextView: TextView = findViewById(R.id.coordinatesTextView)
@@ -97,7 +108,8 @@ class WeatherActivity : AppCompatActivity() {
             if (reportText.isNotEmpty() && userId != null) {
                 val report = mapOf(
                     "userId" to userId,
-                    "timestamp" to timestamp,
+                    "coordinatesTimestamp" to timestamp,
+                    "timestamp" to System.currentTimeMillis(),
                     "report" to reportText,
                     "latitude" to latitude,
                     "longitude" to longitude
@@ -161,7 +173,7 @@ class WeatherActivity : AppCompatActivity() {
     /**
      * Add item to firebase realtime database in collection hotspots
      */
-    private fun addReportToDatabase(report: Map<String, Any>) {
+    private fun addReportToDatabaseOLD(report: Map<String, Any>) {
         val databaseReference = FirebaseDatabase.getInstance().reference.child("hotspots").push()
         databaseReference.setValue(report)
             .addOnSuccessListener {
@@ -172,5 +184,20 @@ class WeatherActivity : AppCompatActivity() {
             }
     }
 
+    private fun addReportToDatabase(report: Map<String, Any>) {
+        // Asumimos que 'timestamp' es una clave en el mapa 'report' y su valor es un Long.
+        val timestamp = report["timestamp"].toString()
 
+        // Obtenemos la referencia a la base de datos en la colección 'hotspots' y usamos el timestamp como clave.
+        val databaseReference = FirebaseDatabase.getInstance().reference.child("hotspots").child(timestamp)
+
+        databaseReference.setValue(report)
+            .addOnSuccessListener {
+                Toast.makeText(this, "Report added successfully", Toast.LENGTH_SHORT).show()
+            }
+            .addOnFailureListener { e ->
+                Toast.makeText(this, "Failed to add report: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
+    }
+    
 }

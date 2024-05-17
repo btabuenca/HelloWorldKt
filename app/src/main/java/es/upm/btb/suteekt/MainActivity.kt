@@ -17,6 +17,7 @@ import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.EditText
+import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.Toolbar
@@ -30,6 +31,9 @@ import kotlinx.coroutines.launch
 import com.firebase.ui.auth.AuthUI
 import com.firebase.ui.auth.IdpResponse
 import com.google.firebase.auth.FirebaseAuth
+import es.upm.btb.suteekt.persistence.FirebaseUploader
+import android.net.Uri
+
 
 class MainActivity : AppCompatActivity(), LocationListener {
     private val TAG = "btaMainActivity"
@@ -38,6 +42,8 @@ class MainActivity : AppCompatActivity(), LocationListener {
     private val locationPermissionCode = 2
     private lateinit var database: AppDatabase
     private lateinit var signInLauncher: ActivityResultLauncher<Intent>
+    private lateinit var uploader: FirebaseUploader
+    private lateinit var filePickerLauncher: ActivityResultLauncher<String>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -135,6 +141,24 @@ class MainActivity : AppCompatActivity(), LocationListener {
         // Room database init
         database = Room.databaseBuilder(applicationContext, AppDatabase::class.java, "coordinates").build()
 
+
+        // Firebase uploader init
+        uploader = FirebaseUploader()
+        filePickerLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+            uri?.let {
+                uploader.uploadFile(uri, onSuccess = {
+                    Toast.makeText(this, "Archivo subido con éxito!", Toast.LENGTH_SHORT).show()
+                }, onFailure = { exception ->
+                    Toast.makeText(this, "Error al subir archivo: ${exception.message}", Toast.LENGTH_SHORT).show()
+                })
+            }
+        }
+
+        val imageView = findViewById<ImageView>(R.id.appIconImageView)
+        imageView.setOnClickListener {
+            // Configura el launcher para aceptar imágenes, videos y PDFs
+            filePickerLauncher.launch("*/*")
+        }
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
@@ -220,6 +244,11 @@ class MainActivity : AppCompatActivity(), LocationListener {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        updateUIWithUserData()
+    }
+
     private fun launchSignInFlow() {
         val providers = arrayListOf(
             AuthUI.IdpConfig.EmailBuilder().build(),
@@ -257,8 +286,4 @@ class MainActivity : AppCompatActivity(), LocationListener {
         Log.d(TAG, "User: $user, Email: $userNameTextView")
     }
 
-    override fun onResume() {
-        super.onResume()
-        updateUIWithUserData()
-    }
 }
